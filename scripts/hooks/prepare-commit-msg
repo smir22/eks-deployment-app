@@ -1,0 +1,99 @@
+#!/usr/bin/env bash
+# Drafts a Conventional Commits subject line from the staged diff using the
+# claude CLI, and pre-fills it into the commit message editor.
+#
+# Install:
+#   ln -sf ../../scripts/hooks/prepare-commit-msg .git/hooks/prepare-commit-msg
+#
+# Fires only on a plain `git commit`. Skipped for -m/-F, merges, squashes,
+# amends, and templates. Bypass once with:
+#   NO_AI_COMMIT=1 git commit
+#
+# The draft is only ever pre-filled — you review, edit, or clear it before
+# saving, and conventional-pre-commit validates the final message on commit-msg.
+# Nothing is committed without your confirmation. If the claude CLI is absent,
+# errors, or returns anything that is not a valid Conventional Commit subject,
+# the hook exits silently and git behaves exactly as if it were not installed.
+
+set -u
+
+MSG_FILE="$1"
+SOURCE="${2-}"
+
+# Model used for drafting. Small + fast is the right trade-off here; edit freely.
+MODEL="claude-haiku-4-5-20251001"
+
+# --- bail-out conditions ------------------------------------------------------
+
+# Only draft when git supplied no message source (a bare `git commit`).
+[ -n "$SOURCE" ] && exit 0
+
+[ -n "${NO_AI_COMMIT-}" ] && exit 0
+
+command -v claude >/dev/null 2>&1 || exit 0
+
+# --- collect the staged diff --------------------------------------------------
+
+STAT=$(git diff --cached --no-color --stat)
+[ -z "${STAT//[[:space:]]/}" ] && exit 0
+
+# Lockfiles are noise and eat the budget fast.
+BODY=$(git diff --cached --no-color -- . \
+  ':(exclude)*.lock' \
+  ':(exclude)*-lock.json' \
+  ':(exclude)*.sum')
+BODY=${BODY:0:60000}
+
+# --- ask claude ---------------------------------------------------------------
+
+read -r -d '' PROMPT <<'EOF'
+Write ONE Conventional Commits subject line for the staged diff below.
+
+Format: <type>(<optional scope>): <imperative description>
+Types:  feat fix chore docs refactor test perf build ci style
+
+Rules:
+- 72 characters maximum
+- lowercase after the colon, no trailing period
+- describe intent, not a file listing
+- output the single line only: no body, no quotes, no backticks, no preamble
+EOF
+
+# Prefer a timeout so a hung call never blocks a commit. macOS lacks `timeout`
+# unless coreutils is installed, so fall back to running bare.
+if command -v timeout >/dev/null 2>&1; then
+  RUN=(timeout 45 claude)
+elif command -v gtimeout >/dev/null 2>&1; then
+  RUN=(gtimeout 45 claude)
+else
+  RUN=(claude)
+fi
+
+ask() {
+  printf '%s\n\n--- STAGED DIFF ---\n%s\n%s\n' "$PROMPT" "$STAT" "$BODY" \
+    | "${RUN[@]}" -p "$@" 2>/dev/null
+}
+
+# Retry without the pinned model in case that id is unavailable on this account.
+RAW=$(ask --model "$MODEL") || RAW=""
+[ -z "${RAW//[[:space:]]/}" ] && RAW=$(ask)
+
+# --- sanitise -----------------------------------------------------------------
+
+MESSAGE=$(printf '%s\n' "$RAW" \
+  | grep -v '^[[:space:]]*```' \
+  | grep -v '^[[:space:]]*$' \
+  | head -n 1 \
+  | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' \
+        -e 's/^["`'"'"']//' -e 's/["`'"'"']$//')
+
+# Only use it if it actually looks like a conventional commit subject.
+printf '%s' "$MESSAGE" \
+  | grep -Eq '^(feat|fix|chore|docs|refactor|test|perf|build|ci|style)(\([^)]+\))?!?: .+' \
+  || exit 0
+
+[ "${#MESSAGE}" -gt 100 ] && exit 0
+
+# --- pre-fill the editor ------------------------------------------------------
+
+printf '%s\n%s\n' "$MESSAGE" "$(cat "$MSG_FILE")" > "$MSG_FILE"
