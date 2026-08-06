@@ -16,6 +16,13 @@ crash.*.log
 *.tfvars
 *.tfvars.json
 
+# ...with one deliberate exception. The root layer's tfvars holds only
+# non-sensitive configuration (region, naming, tags) and is committed so the
+# layer is reproducible from the repo alone. This stays default-deny: any other
+# tfvars file — secrets.tfvars, prod.auto.tfvars — remains ignored unless it is
+# explicitly negated here. Secrets belong in Secrets Manager, never in tfvars.
+!terraform.tfvars
+
 # Ignore override files as they are usually used to override resources locally and so
 # are not checked in
 override.tf
