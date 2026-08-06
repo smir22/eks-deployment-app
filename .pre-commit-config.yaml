@@ -1,6 +1,11 @@
 # Install both hook types with a bare `pre-commit install`.
 default_install_hook_types: [pre-commit, commit-msg]
 
+# Without this, hooks default to every stage — so installing the commit-msg
+# hook type makes the whole suite run a second time per commit. Only
+# conventional-pre-commit opts back in to commit-msg.
+default_stages: [pre-commit]
+
 # Helm templates are Go templates, not YAML — check-yaml chokes on {{ }}.
 exclude: ^gitops/charts/.*/templates/
 
