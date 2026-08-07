@@ -1,6 +1,5 @@
 terraform {
-  # S3 native state locking (use_lockfile) landed in 1.10
-  required_version = ">= 1.10"
+  required_version = ">= 1.15.0, < 2.0.0"
 
   required_providers {
     aws = {
