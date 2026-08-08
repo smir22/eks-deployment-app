@@ -12,3 +12,8 @@ output "eks_secrets_kms_key_arn" {
   description = "ARN of the KMS key encrypting EKS Cluster secrets."
   value       = aws_kms_key.eks_cluster.arn
 }
+
+output "ecr_url" {
+  description = "ECR Repo URL"
+  value       = aws_ecr_repository.eks_ecr.repository_url
+}

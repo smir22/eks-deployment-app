@@ -22,6 +22,8 @@ No modules.
 
 | Name | Type |
 |------|------|
+| [aws_ecr_lifecycle_policy.eks_ecr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_lifecycle_policy) | resource |
+| [aws_ecr_repository.eks_ecr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_repository) | resource |
 | [aws_kms_alias.eks_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
 | [aws_kms_alias.tf_state](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
 | [aws_kms_key.eks_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key) | resource |
@@ -47,6 +49,7 @@ No modules.
 
 | Name | Description |
 |------|-------------|
+| <a name="output_ecr_url"></a> [ecr\_url](#output\_ecr\_url) | ECR Repo URL |
 | <a name="output_eks_secrets_kms_key_arn"></a> [eks\_secrets\_kms\_key\_arn](#output\_eks\_secrets\_kms\_key\_arn) | ARN of the KMS key encrypting EKS Cluster secrets. |
 | <a name="output_state_bucket_name"></a> [state\_bucket\_name](#output\_state\_bucket\_name) | Name of the S3 bucket holding Terraform state for every layer. |
 | <a name="output_state_kms_key_arn"></a> [state\_kms\_key\_arn](#output\_state\_kms\_key\_arn) | ARN of the KMS key encrypting Terraform state. |
