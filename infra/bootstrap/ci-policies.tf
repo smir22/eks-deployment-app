@@ -51,14 +51,29 @@ data "aws_iam_policy_document" "workload_boundary" {
     ]
   }
 
+  # PutKeyPolicy belongs here rather than with the destructive calls: rewriting a
+  # key's policy is how a principal grants itself access to a key it was never
+  # given, without touching the key material at all.
   statement {
-    sid    = "DenyKeyDestruction"
+    sid    = "DenyKeyTampering"
     effect = "Deny"
     actions = [
       "kms:DisableKey",
+      "kms:PutKeyPolicy",
       "kms:ScheduleKeyDeletion",
     ]
     resources = ["*"]
+  }
+
+  # A boundary caps the role it is attached to. It does not follow that role into an
+  # assumed session — the session takes the target role's permissions and the target
+  # role's boundary. Without this, a bounded role assumes an unbounded one and the
+  # ceiling is gone.
+  statement {
+    sid           = "DenyAssumingRolesOutsideWorkloadPath"
+    effect        = "Deny"
+    actions       = ["sts:AssumeRole"]
+    not_resources = [local.workload_role_path_arn]
   }
 }
 
@@ -181,6 +196,16 @@ data "aws_iam_policy_document" "terraform_apply" {
     not_resources = [local.workload_role_path_arn]
   }
 
+  # Attaching an existing role to something CI controls — an EC2 instance, a Lambda,
+  # an ECS task — hands over that role's credentials. The boundary cannot help: no
+  # role is created, so there is nothing to cap.
+  statement {
+    sid           = "DenyPassingRolesOutsideWorkloadPath"
+    effect        = "Deny"
+    actions       = ["iam:PassRole"]
+    not_resources = [local.workload_role_path_arn]
+  }
+
   # A boundary that the bounded principal can rewrite is not a boundary.
   statement {
     sid    = "DenyBoundaryTampering"
@@ -206,13 +231,33 @@ data "aws_iam_policy_document" "terraform_apply" {
     resources = ["*"]
   }
 
+  # CI authenticates through OIDC and never manages users or groups. Blocking only
+  # the create calls left every user that already exists reachable — a boundary
+  # applies to roles, and never to a principal CI did not create. Resetting an
+  # existing admin's console password is the shortest path here, so the edit calls
+  # matter as much as the create ones. Named individually rather than as iam:*User*,
+  # which would also deny reads and surface later as an opaque plan failure.
   statement {
-    sid    = "DenyLongLivedCredentials"
+    sid    = "DenyUserAndGroupManagement"
     effect = "Deny"
     actions = [
+      "iam:AddUserToGroup",
+      "iam:AttachGroupPolicy",
+      "iam:AttachUserPolicy",
       "iam:CreateAccessKey",
+      "iam:CreateGroup",
       "iam:CreateLoginProfile",
       "iam:CreateUser",
+      "iam:DeleteGroupPolicy",
+      "iam:DeleteUserPolicy",
+      "iam:DetachGroupPolicy",
+      "iam:DetachUserPolicy",
+      "iam:PutGroupPolicy",
+      "iam:PutUserPolicy",
+      "iam:RemoveUserFromGroup",
+      "iam:UpdateAccessKey",
+      "iam:UpdateLoginProfile",
+      "iam:UpdateUser",
     ]
     resources = ["*"]
   }
