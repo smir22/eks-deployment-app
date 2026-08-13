@@ -16,13 +16,13 @@ data "aws_iam_policy_document" "workload_boundary" {
   # Checkov reads the Allow statement and stops; it does not evaluate the Deny
   # statements that follow, and a boundary grants nothing on its own in any case.
   # checkov:skip=CKV_AWS_1: a boundary is a ceiling, not a grant
-  # checkov:skip=CKV_AWS_49: the wildcard is the point — Deny narrows it
+  # checkov:skip=CKV_AWS_49: the wildcard is the point - Deny narrows it
   # checkov:skip=CKV_AWS_107: credentials exposure is closed by DenyIdentityAndAccountControl
   # checkov:skip=CKV_AWS_108: exfiltration paths are capped by the bounded role's own policy
   # checkov:skip=CKV_AWS_109: iam:* is denied outright
   # checkov:skip=CKV_AWS_110: escalation requires iam:*, which is denied outright
-  # checkov:skip=CKV_AWS_111: intentional — the intersecting identity policy is the constraint
-  # checkov:skip=CKV_AWS_356: intentional — see above
+  # checkov:skip=CKV_AWS_111: intentional - the intersecting identity policy is the constraint
+  # checkov:skip=CKV_AWS_356: intentional - see above
   statement {
     sid       = "AllowAllServices"
     effect    = "Allow"
@@ -66,7 +66,7 @@ data "aws_iam_policy_document" "workload_boundary" {
   }
 
   # A boundary caps the role it is attached to. It does not follow that role into an
-  # assumed session — the session takes the target role's permissions and the target
+  # assumed session - the session takes the target role's permissions and the target
   # role's boundary. Without this, a bounded role assumes an unbounded one and the
   # ceiling is gone.
   statement {
@@ -134,17 +134,17 @@ resource "aws_iam_role_policy" "terraform_plan_state" {
 
 data "aws_iam_policy_document" "terraform_apply" {
   # Deliberate deny-list. Enumerating every API the main layer calls would still have
-  # to include iam:CreateRole, so it needs the boundary condition regardless — the
+  # to include iam:CreateRole, so it needs the boundary condition regardless - the
   # allow-list buys nothing here and costs an edit per failed apply. Checkov does not
   # evaluate the Deny statements below.
   # checkov:skip=CKV_AWS_1: constrained by the Deny statements, not by the Allow
-  # checkov:skip=CKV_AWS_49: intentional — Terraform's API surface is not enumerable
+  # checkov:skip=CKV_AWS_49: intentional - Terraform's API surface is not enumerable
   # checkov:skip=CKV_AWS_107: DenyLongLivedCredentials blocks access-key creation
   # checkov:skip=CKV_AWS_108: single-account CI role; no cross-account trust exists
   # checkov:skip=CKV_AWS_109: role mutation is confined to the workload path
   # checkov:skip=CKV_AWS_110: DenyRoleCreationWithoutBoundary closes the escalation path
-  # checkov:skip=CKV_AWS_111: intentional — see above
-  # checkov:skip=CKV_AWS_356: intentional — see above
+  # checkov:skip=CKV_AWS_111: intentional - see above
+  # checkov:skip=CKV_AWS_356: intentional - see above
   statement {
     sid       = "AllowAllServices"
     effect    = "Allow"
@@ -196,8 +196,8 @@ data "aws_iam_policy_document" "terraform_apply" {
     not_resources = [local.workload_role_path_arn]
   }
 
-  # Attaching an existing role to something CI controls — an EC2 instance, a Lambda,
-  # an ECS task — hands over that role's credentials. The boundary cannot help: no
+  # Attaching an existing role to something CI controls - an EC2 instance, a Lambda,
+  # an ECS task - hands over that role's credentials. The boundary cannot help: no
   # role is created, so there is nothing to cap.
   statement {
     sid           = "DenyPassingRolesOutsideWorkloadPath"
@@ -232,7 +232,7 @@ data "aws_iam_policy_document" "terraform_apply" {
   }
 
   # CI authenticates through OIDC and never manages users or groups. Blocking only
-  # the create calls left every user that already exists reachable — a boundary
+  # the create calls left every user that already exists reachable - a boundary
   # applies to roles, and never to a principal CI did not create. Resetting an
   # existing admin's console password is the shortest path here, so the edit calls
   # matter as much as the create ones. Named individually rather than as iam:*User*,

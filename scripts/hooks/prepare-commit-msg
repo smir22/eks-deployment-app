@@ -9,7 +9,7 @@
 # amends, and templates. Bypass once with:
 #   NO_AI_COMMIT=1 git commit
 #
-# The draft is only ever pre-filled — you review, edit, or clear it before
+# The draft is only ever pre-filled - you review, edit, or clear it before
 # saving, and conventional-pre-commit validates the final message on commit-msg.
 # Nothing is committed without your confirmation. If the claude CLI is absent,
 # errors, or returns anything that is not a valid Conventional Commit subject,

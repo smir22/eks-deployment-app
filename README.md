@@ -7,13 +7,13 @@ and delivered via GitOps. Region `eu-west-2`.
 
 ```
 infra/                Terraform
-  bootstrap/          applied once by hand — state bucket, KMS, ECR, GitHub OIDC
+  bootstrap/          applied once by hand - state bucket, KMS, ECR, GitHub OIDC
   modules/            vpc, iam, eks
   *.tf                main layer, consumes the modules
 app/                  static site + Dockerfile
 gitops/               ArgoCD Applications and the app Helm chart
 scripts/hooks/        optional local git hooks
-.github/workflows/    CI — terraform plan/apply, build and deploy
+.github/workflows/    CI - terraform plan/apply, build and deploy
 ```
 
 The bootstrap layer is deliberately separate: it creates the state bucket the
@@ -31,7 +31,7 @@ Route53 hosted zone that Terraform must never own.
 | kubectl / helm | current | cluster access once EKS is up |
 
 `tflint`, `checkov`, `gitleaks`, and `terraform-docs` do **not** need to be
-installed manually — pre-commit provisions them into isolated environments.
+installed manually - pre-commit provisions them into isolated environments.
 
 ## Development setup
 
@@ -59,13 +59,13 @@ pre-commit run --all-files
 | `terraform_tflint` | `infra/**/*.tf` | provider-aware linting, recursive |
 | `terraform_docs` | `infra/**/*.tf` | regenerates module READMEs from variables/outputs |
 | `terraform_checkov` | `infra/**/*.tf` | IaC security policy |
-| `gitleaks` | repo-wide | secret detection — intentionally unscoped |
+| `gitleaks` | repo-wide | secret detection - intentionally unscoped |
 | `hadolint-docker` | `app/**` Dockerfiles | Dockerfile linting |
 | `conventional-pre-commit` | commit message | enforces the commit convention below |
 | whitespace / YAML / JSON / private-key | repo-wide | general hygiene |
 
-Terraform hooks are path-scoped to `infra/` so a `.tf` file elsewhere — a docs
-example, a vendored chart — cannot trigger an init cycle. `gitleaks` is
+Terraform hooks are path-scoped to `infra/` so a `.tf` file elsewhere - a docs
+example, a vendored chart - cannot trigger an init cycle. `gitleaks` is
 deliberately left repo-wide, since a leaked secret matters wherever it lands.
 
 Helm chart templates are excluded from `check-yaml`: they are Go templates, and
@@ -81,7 +81,7 @@ Helm chart templates are excluded from `check-yaml`: they are Go templates, and
 ```
 
 Types: `feat` `fix` `docs` `refactor` `chore` `ci` `test` `style` `perf` `build`
-`revert`. Scope is the epic — `vpc`, `eks`, `bootstrap`, `argocd`, `ingress`,
+`revert`. Scope is the epic - `vpc`, `eks`, `bootstrap`, `argocd`, `ingress`,
 `app`, `pipelines`, `docs`. Imperative mood, lowercase, no full stop, ~72 chars.
 
 ```
@@ -101,7 +101,7 @@ pre-fills it into your editor. It is opt-in:
 ln -sf ../../scripts/hooks/prepare-commit-msg .git/hooks/prepare-commit-msg
 ```
 
-It only fires on a bare `git commit` — `git commit -m`, merges, squashes, and
+It only fires on a bare `git commit` - `git commit -m`, merges, squashes, and
 amends are left untouched. `NO_AI_COMMIT=1 git commit` bypasses it for one
 commit. The message is always pre-filled rather than applied, so you review and
 edit before saving, and the `commit-msg` hook validates the result either way.

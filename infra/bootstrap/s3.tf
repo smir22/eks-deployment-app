@@ -106,7 +106,7 @@ data "aws_iam_policy_document" "tf_state" {
 
   # The apply role runs the main layer and has no business reconfiguring the bucket
   # that holds its own state. Bootstrap is applied by hand, so nothing legitimate is
-  # lost. Bucket-level actions only — the role must still read, write and lock state
+  # lost. Bucket-level actions only - the role must still read, write and lock state
   # objects, so the /* ARN is deliberately absent here.
   statement {
     sid    = "DenyBucketReconfiguration"

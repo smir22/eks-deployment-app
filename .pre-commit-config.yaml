@@ -1,16 +1,16 @@
 # Install both hook types with a bare `pre-commit install`.
 default_install_hook_types: [pre-commit, commit-msg]
 
-# Without this, hooks default to every stage — so installing the commit-msg
+# Without this, hooks default to every stage - so installing the commit-msg
 # hook type makes the whole suite run a second time per commit. Only
 # conventional-pre-commit opts back in to commit-msg.
 default_stages: [pre-commit]
 
-# Helm templates are Go templates, not YAML — check-yaml chokes on {{ }}.
+# Helm templates are Go templates, not YAML - check-yaml chokes on {{ }}.
 exclude: ^gitops/charts/.*/templates/
 
 repos:
-  # Generic hygiene — intentionally repo-wide, no path scoping.
+  # Generic hygiene - intentionally repo-wide, no path scoping.
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
@@ -27,7 +27,7 @@ repos:
 
   # Terraform tooling is scoped to infra/ so a stray .tf elsewhere (a docs
   # example, a vendored chart) cannot trigger an init/plan cycle. The regex
-  # keeps the extension filter — a bare `files: ^infra/` would also match
+  # keeps the extension filter - a bare `files: ^infra/` would also match
   # README.md and .terraform.lock.hcl and feed them to terraform fmt.
   - repo: https://github.com/antonbabenko/pre-commit-terraform
     rev: v1.108.1

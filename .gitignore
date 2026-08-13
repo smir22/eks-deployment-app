@@ -19,7 +19,7 @@ crash.*.log
 # ...with one deliberate exception. The root layer's tfvars holds only
 # non-sensitive configuration (region, naming, tags) and is committed so the
 # layer is reproducible from the repo alone. This stays default-deny: any other
-# tfvars file — secrets.tfvars, prod.auto.tfvars — remains ignored unless it is
+# tfvars file - secrets.tfvars, prod.auto.tfvars - remains ignored unless it is
 # explicitly negated here. Secrets belong in Secrets Manager, never in tfvars.
 !terraform.tfvars
 

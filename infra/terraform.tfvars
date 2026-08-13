@@ -1,4 +1,4 @@
-# Committed deliberately — this holds only non-sensitive configuration so the
+# Committed deliberately - this holds only non-sensitive configuration so the
 # layer is reproducible from the repository alone. Every other *.tfvars file is
 # ignored by .gitignore; secrets belong in AWS Secrets Manager, never here.
 
