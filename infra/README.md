@@ -14,7 +14,9 @@ No providers.
 
 ## Modules
 
-No modules.
+| Name | Source | Version |
+|------|--------|---------|
+| <a name="module_vpc"></a> [vpc](#module\_vpc) | ./modules/vpc | n/a |
 
 ## Resources
 
