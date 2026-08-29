@@ -1,6 +1,14 @@
 # Local .terraform directories
 .terraform/
 
+# Child-module lock files. Terraform only ever reads the lock file belonging to
+# the root module, so these are inert - but the pre-commit terraform hooks run
+# `terraform init` in every directory they touch, which regenerates one per
+# module on each commit. Committing them would mean a repo full of duplicated
+# provider hashes that nothing consumes and that drift independently of the
+# root's. Both root layers - infra/ and infra/bootstrap/ - still commit theirs.
+infra/modules/*/.terraform.lock.hcl
+
 # .tfstate files
 *.tfstate
 *.tfstate.*
